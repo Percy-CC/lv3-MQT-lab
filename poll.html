@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTTP Poll 模擬</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.16.0/mqtt.min.js"></script>
+</head>
+<body>
+<header><h1>HTTP Poll 模擬</h1><nav><a href="index.html">首頁</a><a href="client.html">MQTT 客戶端(Push)</a><a href="poll.html">HTTP Poll 模擬</a></nav></header>
+<main>
+<div class="note">
+ 模擬原理:Broker 上的 Retained message 相當於「伺服器上的最新資料」。Poll 每次都新建連線、讀取、馬上關閉,模仿 HTTP「一個 Request 對應一個 Response,一回合溝通即完結」。這是模擬,並非真正的 HTTP。
+</div>
+
+<div class="panel">
+ <div class="row">
+  <label>Room<input type="text" id="room" placeholder="例:3A-g1" size="10"></label>
+  <label>Poll 間隔<select id="interval"><option value="5" selected>5 秒</option><option value="10">10 秒</option><option value="3">3 秒</option></select></label>
+  <button id="start">① 開始實驗(60 秒)</button>
+  <button id="stop" class="gray">停止</button>
+  <button id="bot" disabled>② 啟動機器人(全組一人按即可)</button>
+ </div>
+ <p>剩餘時間:<span class="big" id="left">60</span> 秒 | 狀態:<span id="state">待機</span></p>
+ <p>「伺服器」資料位置(Topic):<code id="topicShow">-</code></p>
+</div>
+
+<div class="cols">
+ <div class="panel">
+  <h2>Poll:每次都主動詢問</h2>
+  <table>
+   <tr><td>HTTP Request 次數</td><td id="p_req">0</td></tr>
+   <tr><td>開啟連線次數</td><td id="p_conn">0</td></tr>
+   <tr><td>200 有新資料</td><td id="p_hit">0</td></tr>
+   <tr><td>304 沒有變化(白問)</td><td id="p_empty">0</td></tr>
+   <tr><td>白問比例</td><td id="p_ratio">-</td></tr>
+   <tr><td>逾時或錯誤</td><td id="p_err">0</td></tr>
+  </table>
+  <div class="log" id="p_log"></div>
+ </div>
+ <div class="panel">
+  <h2>Push:訂閱一次,有新訊息才通知</h2>
+  <table>
+   <tr><td>額外詢問次數</td><td>0</td></tr>
+   <tr><td>開啟連線次數</td><td id="s_conn">0</td></tr>
+   <tr><td>收到通知次數</td><td id="s_msgs">0</td></tr>
+   <tr><td>無新訊息時的通知</td><td>0</td></tr>
+  </table>
+  <div class="log" id="s_log"></div>
+ </div>
+</div>
+
+<div class="panel">
+ <h2>如何手動發布訊息(不用機器人)</h2>
+ <p>開啟「MQTT 客戶端」頁,連線後在 Publish 區域輸入 Topic(上面顯示的 Topic)、勾選 <b>Retain</b>,Message 輸入例如「公告 #1」,按 Publish。</p>
+</div>
+</main>
+
+<script>
+const BROKER = "wss://broker.hivemq.com:8884/mqtt";
+const DURATION = 60;
+const $ = id => document.getElementById(id);
+const rid = () => Math.random().toString(36).slice(2, 10);
+const addLog = (id, t) => { const d = document.createElement("div"); d.textContent = t; $(id).appendChild(d); $(id).scrollTop = 1e9; };
+
+let st, topic = null, running = false, t0 = 0, last = null;
+let pollTimer = null, tick = null, busy = false, pushClient = null, botTimers = [], botUsed = false;
+const nowStr = () => ((Date.now() - t0) / 1000).toFixed(1) + "s";
+
+function render(){
+  $("p_req").textContent = st.req; $("p_conn").textContent = st.conn;
+  $("p_hit").textContent = st.hit; $("p_empty").textContent = st.empty; $("p_err").textContent = st.err;
+  $("p_ratio").textContent = st.req ? Math.round(st.empty / st.req * 100) + "%" : "-";
+  $("s_conn").textContent = st.sconn; $("s_msgs").textContent = st.push;
+}
+
+function pollOnce(tp){
+  return new Promise(resolve => {
+    const c = mqtt.connect(BROKER, { clientId: "poll_" + rid(), clean: true, reconnectPeriod: 0, connectTimeout: 4000 });
+    let done = false;
+    const finish = r => { if(done) return; done = true; clearTimeout(timer); c.end(true); resolve(r); };
+    const timer = setTimeout(() => finish({ kind: "timeout" }), 4000);
+    c.on("connect", () => c.subscribe(tp, { qos: 0 }));
+    c.on("message", (t, payload) => finish({ kind: "data", text: payload.toString() }));
+    c.on("error", e => finish({ kind: "error", msg: e.message }));
+  });
+}
+
+async function doPoll(){
+  if(busy || !running) return;
+  busy = true; st.req++; st.conn++;
+  const r = await pollOnce(topic);
+  if(!running){ busy = false; return; }
+  if(r.kind === "data" && r.text !== last){
+    last = r.text; st.hit++; addLog("p_log", `${nowStr()} GET → 200 有新資料:${r.text}`);
+  } else if(r.kind === "data"){
+    st.empty++; addLog("p_log", `${nowStr()} GET → 304 沒有變化(白問)`);
+  } else if(r.kind === "timeout"){
+    st.empty++; addLog("p_log", `${nowStr()} GET → 暫無資料(白問)`);
+  } else {
+    st.err++; addLog("p_log", `${nowStr()} GET → 錯誤:${r.msg}`);
+  }
+  busy = false; render();
+}
+
+async function start(){
+  const room = $("room").value.trim().replace(/[\/+#\s]/g, "");
+  if(!room){ alert("請輸入 Room"); return; }
+  stop(false);
+  topic = `cc-lab/${room}/state`; $("topicShow").textContent = topic;
+  st = { req:0, conn:0, hit:0, empty:0, err:0, sconn:0, push:0 };
+  $("p_log").textContent = ""; $("s_log").textContent = "";
+  $("state").textContent = "準備中(讀取基準資料)…";
+  const base = await pollOnce(topic);
+  last = base.kind === "data" ? base.text : null;
+  pushClient = mqtt.connect(BROKER, { clientId: "push_" + rid(), clean: true, reconnectPeriod: 0 });
+  st.sconn = 1;
+  pushClient.on("connect", () => { pushClient.subscribe(topic, { qos: 0 }); $("bot").disabled = false; });
+  pushClient.on("message", (t, payload, packet) => {
+    if(packet.retain) return;
+    st.push++; addLog("s_log", `${nowStr()} 即時通知:${payload.toString()}`); render();
+  });
+  running = true; t0 = Date.now(); $("state").textContent = "進行中"; render();
+  pollTimer = setInterval(doPoll, Number($("interval").value) * 1000);
+  tick = setInterval(() => {
+    const left = Math.max(0, DURATION - Math.floor((Date.now() - t0) / 1000));
+    $("left").textContent = left; if(left <= 0) stop(true);
+  }, 500);
+}
+
+function stop(done){
+  clearInterval(pollTimer); clearInterval(tick); pollTimer = tick = null;
+  botTimers.forEach(clearTimeout); botTimers = [];
+  const pc = pushClient; pushClient = null;
+  if(pc){
+    if(botUsed){ pc.publish(topic, "", { retain: true }, () => pc.end(true)); botUsed = false; }
+    else pc.end(true);
+  }
+  running = false; $("bot").disabled = true;
+  if(done) $("state").textContent = "完成,請記錄左右兩邊的數字";
+}
+
+function bot(){
+  if(!pushClient || !pushClient.connected){ alert("尚未連線,請稍候"); return; }
+  botUsed = true;
+  for(let i = 1; i <= 5; i++){
+    botTimers.push(setTimeout(() => {
+      if(pushClient) pushClient.publish(topic, `公告 #${i}-${rid().slice(0,3)}`, { qos: 0, retain: true });
+    }, 2000 + Math.random() * 45000));
+  }
+  $("bot").disabled = true;
+  $("state").textContent = "機器人已啟動:50 秒內隨機發布 5 則";
+}
+
+$("start").onclick = start;
+$("stop").onclick = () => stop(true);
+$("bot").onclick = bot;
+</script>
+</body>
+</html>

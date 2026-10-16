@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MQTT 客戶端</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.16.0/mqtt.min.js"></script>
+</head>
+<body>
+<header><h1>MQTT 客戶端(Push)</h1><nav><a href="index.html">首頁</a><a href="client.html">MQTT 客戶端(Push)</a><a href="poll.html">HTTP Poll 模擬</a></nav></header>
+<main>
+<div class="note">公共 Broker 人人可見,請勿輸入個人資料。Topic 請使用本組前綴,例如 cc-lab/3A/g1/news。</div>
+
+<div class="panel">
+ <h2>Connection <span id="status" class="status ng">● disconnected</span></h2>
+ <div class="row">
+  <label>Host<input type="text" id="host" value="broker.hivemq.com" size="22"></label>
+  <label>Port<input type="number" id="port" value="8884" style="width:90px"></label>
+  <label>ClientID<input type="text" id="cid" size="24"></label>
+  <button id="btnConn">Connect</button>
+ </div>
+ <div class="row">
+  <label>Username<input type="text" id="user"></label>
+  <label>Password<input type="password" id="pass"></label>
+  <label>Keep Alive<input type="number" id="ka" value="60" style="width:80px"></label>
+  <label class="chk"><input type="checkbox" id="ssl" checked> SSL</label>
+  <label class="chk"><input type="checkbox" id="clean" checked> Clean Session</label>
+ </div>
+</div>
+
+<div class="cols">
+ <div>
+  <div class="panel">
+   <h2>Publish</h2>
+   <div class="row">
+    <label>Topic<input type="text" id="pubTopic" placeholder="cc-lab/3A/g1/news" size="26"></label>
+    <label>QoS<select id="pubQos"><option>0</option><option>1</option><option>2</option></select></label>
+    <label class="chk"><input type="checkbox" id="pubRetain"> Retain</label>
+   </div>
+   <label>Message<textarea id="pubMsg"></textarea></label>
+   <p><button id="btnPub" disabled>Publish</button></p>
+  </div>
+ </div>
+ <div>
+  <div class="panel">
+   <h2>Subscriptions</h2>
+   <div class="row">
+    <label>Topic<input type="text" id="subTopic" placeholder="cc-lab/3A/g1/news" size="24"></label>
+    <label>QoS<select id="subQos"><option>0</option><option>1</option><option>2</option></select></label>
+    <button id="btnSub" disabled>Add New Topic Subscription</button>
+   </div>
+   <div id="subs"></div>
+  </div>
+ </div>
+</div>
+
+<div class="panel">
+ <h2>Messages <button class="gray" id="btnClear" style="float:right;padding:3px 10px;font-size:13px">Clear</button></h2>
+ <div id="msgs"></div>
+</div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const COLORS = ["#1aa3d6","#e67e22","#27ae60","#8e44ad","#c0392b","#16a085"];
+let client = null;
+const subs = new Map();
+let colorIdx = 0;
+
+$("cid").value = "clientId-" + Math.random().toString(36).slice(2, 12);
+$("ssl").onchange = () => { $("port").value = $("ssl").checked ? 8884 : 8000; };
+
+function setStatus(t, ok){ const s = $("status"); s.textContent = "● " + t; s.className = "status " + (ok ? "ok" : "ng"); }
+function enable(on){ $("btnPub").disabled = !on; $("btnSub").disabled = !on; $("btnConn").textContent = on ? "Disconnect" : "Connect"; }
+
+function matches(filter, topic){
+  const f = filter.split("/"), t = topic.split("/");
+  for(let i = 0; i < f.length; i++){
+    if(f[i] === "#") return true;
+    if(i >= t.length) return false;
+    if(f[i] !== "+" && f[i] !== t[i]) return false;
+  }
+  return f.length === t.length;
+}
+function colorFor(topic){
+  for(const [f, c] of subs){ if(matches(f, topic)) return c; }
+  return "#999";
+}
+function renderSubs(){
+  const box = $("subs"); box.textContent = "";
+  for(const [f, c] of subs){
+    const d = document.createElement("div"); d.className = "sub";
+    const dot = document.createElement("span"); dot.className = "dot"; dot.style.background = c;
+    const name = document.createElement("span"); name.textContent = f;
+    const b = document.createElement("button"); b.className = "red"; b.textContent = "Unsubscribe";
+    b.style.padding = "3px 8px"; b.style.fontSize = "13px";
+    b.onclick = () => { client.unsubscribe(f); subs.delete(f); renderSubs(); };
+    d.append(dot, name, b); box.appendChild(d);
+  }
+}
+
+$("btnConn").onclick = () => {
+  if(client){ client.end(true); client = null; subs.clear(); renderSubs(); enable(false); setStatus("disconnected", false); return; }
+  const ssl = $("ssl").checked;
+  const url = `${ssl ? "wss" : "ws"}://${$("host").value.trim()}:${$("port").value}/mqtt`;
+  setStatus("connecting…", false);
+  client = mqtt.connect(url, {
+    clientId: $("cid").value.trim(),
+    username: $("user").value || undefined,
+    password: $("pass").value || undefined,
+    keepalive: Number($("ka").value) || 60,
+    clean: $("clean").checked,
+    reconnectPeriod: 0,
+    connectTimeout: 8000
+  });
+  client.on("connect", () => { setStatus("connected", true); enable(true); });
+  client.on("error", e => setStatus("error: " + e.message, false));
+  client.on("close", () => { if(client){ setStatus("disconnected", false); enable(false); } });
+  client.on("message", (topic, payload, packet) => {
+    const d = document.createElement("div"); d.className = "msg"; d.style.borderLeftColor = colorFor(topic);
+    const head = document.createElement("small");
+    head.textContent = `${new Date().toLocaleTimeString()} | topic: ${topic} | qos: ${packet.qos}${packet.retain ? " | retained" : ""}`;
+    const body = document.createElement("div"); body.textContent = payload.toString();
+    d.append(head, body); $("msgs").prepend(d);
+  });
+};
+
+$("btnSub").onclick = () => {
+  const t = $("subTopic").value.trim(); if(!t || !client) return;
+  if(subs.has(t)){ alert("已訂閱此 Topic"); return; }
+  client.subscribe(t, { qos: Number($("subQos").value) }, err => {
+    if(err){ alert("訂閱失敗:" + err.message); return; }
+    subs.set(t, COLORS[colorIdx++ % COLORS.length]); renderSubs();
+  });
+};
+
+$("btnPub").onclick = () => {
+  const t = $("pubTopic").value.trim();
+  if(!t || !client){ return; }
+  if(t === "testtopic/1" && !confirm("Topic 是預設值,可能與其他人混在一起。仍要發布?")) return;
+  client.publish(t, $("pubMsg").value, { qos: Number($("pubQos").value), retain: $("pubRetain").checked });
+};
+$("btnClear").onclick = () => { $("msgs").textContent = ""; };
+</script>
+</body>
+</html>
