@@ -18,7 +18,7 @@
 | Port 8884 + SSL | HiveMQ 瀏覽器客戶端不接受非 TLS 連線;GitHub Pages 為 https,頁面需用 wss | 已採用 |
 | 自建網站取代 HiveMQ 客戶端 | 可簡化介面、控制 Room 命名 | 已建立 `client.html` |
 | Poll 以模擬方式保留 | MQTT 本身是 Push,沒有真正的 Poll | 已建立 `poll.html` |
-| Poll 模擬法:每次新建連線、讀取 Retained message、關閉 | 模仿 HTTP 一問一答、連線即完結 | 已實作,未實測 |
+| Poll 模擬法:每次新建連線、讀取 Retained message、關閉 | 模仿 HTTP 一問一答、連線即完結 | 已實作;本機瀏覽器測試通過,學校網絡待測 |
 | 不用固定 A/B/C/D 角色 | 組員人數不一 | 工作紙 v3 已改 |
 | 託管用 GitHub Pages | 已有 VS Code 與 GitHub | 已採用 |
 | Firebase Realtime Database 方案 | 曾評估,改用 HiveMQ 後不再需要 | 已放棄 |
@@ -40,17 +40,31 @@
 
 | 檔案 | 功能 | 狀態 |
 |---|---|---|
-| `index.html` | 首頁導航 | 已建立 |
-| `client.html` | Connection、Publish、Subscriptions、Messages;支援 `+`、`#` 通配符與 Retain | 已建立,未實測 |
-| `poll.html` | Poll 模擬、Push 對照、機器人、結束時清除 Retained 訊息 | 已建立,未實測 |
-| `style.css` | 共用樣式 | 已建立 |
+| `index.html` | 首頁、MQTT 模型概覽動畫與實驗入口 | 已整合並通過瀏覽器測試 |
+| `client.html` | Connection、Publish、Subscriptions、Messages、Topic 練習與 Retained 動畫 | 已整合；MQTT 連線、訂閱、發布測試通過 |
+| `poll.html` | 本機 Poll/Push 動畫、HiveMQ 實驗、機器人與 Retained 清除 | 已整合並通過瀏覽器測試 |
+| `css/theme.css` | 全站深淺色主題與共用元件樣式 | 已完成 |
+| `js/anim-common.js` | 動畫共用工具與色彩模式初始化 | 已完成 |
+| `js/anim-overview.js` | 首頁 MQTT 模型動畫 | 已完成 |
+| `js/anim-pollpush.js` | Poll 與 Push 模擬動畫 | 已完成 |
+| `js/anim-topics.js` | Topic 通配符練習 | 已完成 |
+| `js/anim-retained.js` | Retained 訊息動畫 | 已完成 |
 
-## 5. 工作紙狀態
+## 5. 最近驗證
 
-- 現有版本:`Lab_MessagingServices_MQTT_v3.docx`。
+- 三頁均檢查深色、淺色模式與 active 導覽；375px 手機寬度沒有橫向溢出，畫布會隨容器縮放。
+- Overview、Poll/Push 模擬、Topic 配對與 Retained 動畫均已在瀏覽器操作。
+- `client.html` 已實際連線 HiveMQ、訂閱隨機測試 Topic、發布非 Retain 訊息並收到訊息。
+- `poll.html` 已測試實驗初始化、機器人啟動與停止；實際清除 Retained 後重新訂閱確認仍列於待辦。
+- 五個 JavaScript 檔通過 `node --check`；三頁 ID 唯一，Console 與編輯器錯誤檢查無錯誤。
+- 尚未在學校 Wi-Fi、多裝置環境或 GitHub Pages 上驗證。
+
+## 6. 工作紙狀態
+
+- 工作紙版本：`Lab_MessagingServices_MQTT_v3.docx`，目前不在此專案目錄內。
 - v3 的任務 1 是單頁 `index.html`(Poll 面板與 Push 面板),與目前多頁網站不一致。
 
-## 6. 待辦事項
+## 7. 待辦事項
 
 - [ ] 上傳網站檔案到 GitHub 並啟用 Pages。
 - [ ] 用學校 Wi-Fi 與手機熱點測試 `wss://broker.hivemq.com:8884/mqtt`。
@@ -61,7 +75,7 @@
 - [ ] 決定任務 3 是否改為不用紙(例如教師投影演示加討論)。
 - [ ] 試教後按學生反應調整時間與難度。
 
-## 7. 風險與未知項目
+## 8. 風險與未知項目
 
 | 風險 | 影響 | 處理 |
 |---|---|---|
@@ -73,7 +87,7 @@
 | Poll 並非真 HTTP | 學生可能誤解 | 課堂上明確說明 |
 | 相同 Room 多人按機器人 | 訊息數增加 | 屬正常,工作紙已註明 |
 
-## 8. 驗收準則
+## 9. 驗收準則
 
 - 學生用手機或電腦開啟網址,毋須安裝或註冊,即可完成任務 0–4。
 - 任務 1 的數據可讓學生分辨 Poll 與 Push 在詢問次數、白問比例與延遲上的差異。

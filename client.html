@@ -4,63 +4,106 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MQTT 客戶端</title>
-<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/theme.css">
+<script src="js/anim-common.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.16.0/mqtt.min.js"></script>
 </head>
 <body>
-<header><h1>MQTT 客戶端(Push)</h1><nav><a href="index.html">首頁</a><a href="client.html">MQTT 客戶端(Push)</a><a href="poll.html">HTTP Poll 模擬</a></nav></header>
+<header class="app-header">
+  <div class="logo"><i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i> MQTT Lab</div>
+  <nav class="tab-bar" aria-label="主要導覽">
+    <a class="tab-btn" href="index.html"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> 首頁</a>
+    <a class="tab-btn active" href="client.html" aria-current="page"><i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i> MQTT Push</a>
+    <a class="tab-btn" href="poll.html"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> HTTP Poll</a>
+  </nav>
+</header>
 <main>
-<div class="note">公共 Broker 人人可見,請勿輸入個人資料。Topic 請使用本組前綴,例如 cc-lab/3A/g1/news。</div>
+  <h1 class="page-title">MQTT 客戶端（Push）</h1>
+  <p class="page-intro">連線到 HiveMQ，透過 Topic 發布和接收即時訊息。</p>
+  <div class="callout warning">公共 Broker 的訊息人人可見，請勿輸入個人資料。Topic 使用本組前綴，例如 <code>cc-lab/3A/g1/news</code>。</div>
 
-<div class="panel">
- <h2>Connection <span id="status" class="status ng">● disconnected</span></h2>
- <div class="row">
-  <label>Host<input type="text" id="host" value="broker.hivemq.com" size="22"></label>
-  <label>Port<input type="number" id="port" value="8884" style="width:90px"></label>
-  <label>ClientID<input type="text" id="cid" size="24"></label>
-  <button id="btnConn">Connect</button>
- </div>
- <div class="row">
-  <label>Username<input type="text" id="user"></label>
-  <label>Password<input type="password" id="pass"></label>
-  <label>Keep Alive<input type="number" id="ka" value="60" style="width:80px"></label>
-  <label class="chk"><input type="checkbox" id="ssl" checked> SSL</label>
-  <label class="chk"><input type="checkbox" id="clean" checked> Clean Session</label>
- </div>
-</div>
+  <section class="card">
+    <h2>Connection <span id="status" class="status ng">● disconnected</span></h2>
+    <div class="row">
+      <label>Host<input type="text" id="host" value="broker.hivemq.com" size="22"></label>
+      <label>Port<input type="number" id="port" value="8884" style="width:90px"></label>
+      <label>ClientID<input type="text" id="cid" size="24"></label>
+      <button class="btn btn-cyan" id="btnConn">Connect</button>
+    </div>
+    <div class="row">
+      <label>Username<input type="text" id="user"></label>
+      <label>Password<input type="password" id="pass"></label>
+      <label>Keep Alive<input type="number" id="ka" value="60" style="width:80px"></label>
+      <label class="chk"><input type="checkbox" id="ssl" checked> SSL</label>
+      <label class="chk"><input type="checkbox" id="clean" checked> Clean Session</label>
+    </div>
+  </section>
 
-<div class="cols">
- <div>
-  <div class="panel">
-   <h2>Publish</h2>
-   <div class="row">
-    <label>Topic<input type="text" id="pubTopic" placeholder="cc-lab/3A/g1/news" size="26"></label>
-    <label>QoS<select id="pubQos"><option>0</option><option>1</option><option>2</option></select></label>
-    <label class="chk"><input type="checkbox" id="pubRetain"> Retain</label>
-   </div>
-   <label>Message<textarea id="pubMsg"></textarea></label>
-   <p><button id="btnPub" disabled>Publish</button></p>
+  <div class="twin-cols">
+    <section class="card">
+      <h2>Publish</h2>
+      <div class="row">
+        <label>Topic<input type="text" id="pubTopic" placeholder="cc-lab/3A/g1/news" size="26"></label>
+        <label>QoS<select id="pubQos"><option>0</option><option>1</option><option>2</option></select></label>
+        <label class="chk"><input type="checkbox" id="pubRetain"> Retain</label>
+      </div>
+      <label>Message<textarea id="pubMsg"></textarea></label>
+      <div class="controls"><button class="btn btn-cyan" id="btnPub" disabled><i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Publish</button></div>
+    </section>
+    <section class="card">
+      <h2>Subscriptions</h2>
+      <div class="row">
+        <label>Topic<input type="text" id="subTopic" placeholder="cc-lab/3A/g1/news" size="24"></label>
+        <label>QoS<select id="subQos"><option>0</option><option>1</option><option>2</option></select></label>
+        <button class="btn btn-cyan" id="btnSub" disabled><i class="fa-solid fa-plus" aria-hidden="true"></i> Add Subscription</button>
+      </div>
+      <div id="subs"></div>
+    </section>
   </div>
- </div>
- <div>
-  <div class="panel">
-   <h2>Subscriptions</h2>
-   <div class="row">
-    <label>Topic<input type="text" id="subTopic" placeholder="cc-lab/3A/g1/news" size="24"></label>
-    <label>QoS<select id="subQos"><option>0</option><option>1</option><option>2</option></select></label>
-    <button id="btnSub" disabled>Add New Topic Subscription</button>
-   </div>
-   <div id="subs"></div>
-  </div>
- </div>
-</div>
 
-<div class="panel">
- <h2>Messages <button class="gray" id="btnClear" style="float:right;padding:3px 10px;font-size:13px">Clear</button></h2>
- <div id="msgs"></div>
-</div>
+  <section class="card">
+    <h2>Messages <button class="btn btn-ghost" id="btnClear" style="float:right;padding:3px 10px;font-size:13px">Clear</button></h2>
+    <div id="msgs"></div>
+  </section>
+
+  <section class="card" aria-labelledby="topics-title">
+    <h2 id="topics-title">Topic 通配符練習</h2>
+    <p>輸入訂閱 filter，看看哪些 Topic 會被匹配。</p>
+    <div class="topic-input-row">
+      <input type="text" id="topicFilter" placeholder="例: cc-lab/3A/+/news 或 cc-lab/#" value="cc-lab/3A/+/news" aria-label="Topic 訂閱 filter">
+      <button class="btn btn-cyan" id="btnMatchTopic"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> 匹配</button>
+    </div>
+    <div class="topic-tree" id="topicTree"></div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--accent4)"></span> 匹配的 Topic</span>
+      <span><span class="dot" style="background:var(--text-dim)"></span> 不匹配</span>
+    </div>
+    <div class="topic-help">
+      <div><strong class="plus">+ 單層通配符</strong><span>只匹配一個層級。<code>cc-lab/+/g1/news</code> 可匹配 <code>cc-lab/3A/g1/news</code>，不匹配 <code>cc-lab/3A/g1/chat</code>。</span></div>
+      <div><strong class="hash"># 多層通配符</strong><span>匹配零個或多個層級，必須放在 filter 最尾。<code>cc-lab/3A/#</code> 可匹配 <code>cc-lab/3A/g1/news</code> 與 <code>cc-lab/3A/g2/chat</code>。</span></div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="retained-title">
+    <h2 id="retained-title">Retained 訊息動畫</h2>
+    <p>Broker 保存 Retained message，新 Subscriber 訂閱時會收到最新保留訊息。本動畫在本機執行，不連線。</p>
+    <div class="canvas-wrap">
+      <canvas id="cvRetained" width="1000" height="400" aria-label="Broker 保存並推送 Retained 訊息的動畫"></canvas>
+    </div>
+    <div class="controls">
+      <button class="btn btn-purple" id="btnPlayRetained"><i class="fa-solid fa-play" aria-hidden="true"></i> 播放動畫</button>
+      <button class="btn btn-ghost" id="btnResetRetained"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> 重播</button>
+    </div>
+    <div class="timeline" id="retainedTimeline"></div>
+  </section>
 </main>
 
+<script src="js/anim-topics.js"></script>
+<script src="js/anim-retained.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const COLORS = ["#1aa3d6","#e67e22","#27ae60","#8e44ad","#c0392b","#16a085"];

@@ -3,15 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>消息服務實驗網站</title>
-<link rel="stylesheet" href="style.css">
+<title>消息服務實驗室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/theme.css">
+<script src="js/anim-common.js"></script>
 </head>
 <body>
-<header><h1>消息服務實驗網站</h1><nav><a href="index.html">首頁</a><a href="client.html">MQTT 客戶端(Push)</a><a href="poll.html">HTTP Poll 模擬</a></nav></header>
+<header class="app-header">
+	<div class="logo"><i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i> MQTT Lab</div>
+	<nav class="tab-bar" aria-label="主要導覽">
+		<a class="tab-btn active" href="index.html" aria-current="page"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> 首頁</a>
+		<a class="tab-btn" href="client.html"><i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i> MQTT Push</a>
+		<a class="tab-btn" href="poll.html"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> HTTP Poll</a>
+	</nav>
+</header>
 <main>
-<div class="note">公共 Broker 人人可見,請勿輸入個人資料。</div>
-<div class="card"><h2>MQTT 客戶端(Push)</h2><p>仿 HiveMQ WebSocket Client 的介面:連線、發布、訂閱、顯示訊息。用於任務 0、2、4。</p><p><a class="btn" href="client.html">開啟</a></p></div>
-<div class="card"><h2>HTTP Poll 模擬</h2><p>模擬傳統 HTTP「一問一答、連線即完結」的 Poll 模式,並與 Push 並排比較。用於任務 1。</p><p><a class="btn" href="poll.html">開啟</a></p></div>
+	<h1 class="page-title">消息服務實驗室</h1>
+	<p class="page-intro">從訊息如何經過 Broker 傳遞開始，動手探索 MQTT、Poll 與 Push。</p>
+	<div class="callout warning">公共 Broker 的訊息人人可見，請勿輸入個人資料。</div>
+
+	<section class="card" aria-labelledby="overview-title">
+		<h2 id="overview-title">MQTT 消息模型</h2>
+		<p>Publisher 發布訊息到 Broker，Broker 依 Topic 轉發給所有 Subscriber。按下發布按鈕，觀察訊息流動。</p>
+		<div class="canvas-wrap">
+			<canvas id="cvOverview" width="1000" height="500" aria-label="Publisher、Broker 與 Subscribers 的訊息流動動畫"></canvas>
+		</div>
+		<div class="controls">
+			<button class="btn btn-amber" id="btnSendMsg"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i> 發布訊息</button>
+			<button class="btn btn-green" id="btnAddSub"><i class="fa-solid fa-plus" aria-hidden="true"></i> 增加訂閱者</button>
+			<button class="btn btn-ghost" id="btnResetOverview"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> 重置</button>
+		</div>
+		<div class="legend">
+			<span><span class="dot" style="background:var(--publisher-color)"></span> Publisher（發布者）</span>
+			<span><span class="dot" style="background:var(--broker-color)"></span> Broker（中介）</span>
+			<span><span class="dot" style="background:var(--subscriber-color)"></span> Subscriber（訂閱者）</span>
+			<span><span class="dot" style="background:var(--accent2)"></span> 訊息粒子</span>
+		</div>
+	</section>
+
+	<div class="twin-cols">
+		<section class="card" aria-labelledby="client-card-title">
+			<h2 id="client-card-title">MQTT 客戶端（Push）</h2>
+			<p>連線 HiveMQ，練習發布、訂閱與 Retained 訊息。</p>
+			<a class="btn btn-cyan" href="client.html"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i> 開啟客戶端</a>
+		</section>
+		<section class="card" aria-labelledby="poll-card-title">
+			<h2 id="poll-card-title">HTTP Poll 實驗</h2>
+			<p>先看本機動畫，再用 HiveMQ 比較 Poll 與 Push。</p>
+			<a class="btn btn-cyan" href="poll.html"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i> 開啟實驗</a>
+		</section>
+	</div>
 </main>
+<script src="js/anim-overview.js"></script>
 </body>
 </html>

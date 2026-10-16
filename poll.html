@@ -4,59 +4,112 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>HTTP Poll 模擬</title>
-<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/theme.css">
+<script src="js/anim-common.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.16.0/mqtt.min.js"></script>
 </head>
 <body>
-<header><h1>HTTP Poll 模擬</h1><nav><a href="index.html">首頁</a><a href="client.html">MQTT 客戶端(Push)</a><a href="poll.html">HTTP Poll 模擬</a></nav></header>
+<header class="app-header">
+  <div class="logo"><i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i> MQTT Lab</div>
+  <nav class="tab-bar" aria-label="主要導覽">
+    <a class="tab-btn" href="index.html"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> 首頁</a>
+    <a class="tab-btn" href="client.html"><i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i> MQTT Push</a>
+    <a class="tab-btn active" href="poll.html" aria-current="page"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> HTTP Poll</a>
+  </nav>
+</header>
 <main>
-<div class="note">
- 模擬原理:Broker 上的 Retained message 相當於「伺服器上的最新資料」。Poll 每次都新建連線、讀取、馬上關閉,模仿 HTTP「一個 Request 對應一個 Response,一回合溝通即完結」。這是模擬,並非真正的 HTTP。
-</div>
+  <h1 class="page-title">HTTP Poll 實驗</h1>
+  <p class="page-intro">先用本機動畫比較 Poll 與 Push，再連線 HiveMQ 進行真實訊息實驗。</p>
 
-<div class="panel">
- <div class="row">
-  <label>Room<input type="text" id="room" placeholder="例:3A-g1" size="10"></label>
-  <label>Poll 間隔<select id="interval"><option value="5" selected>5 秒</option><option value="10">10 秒</option><option value="3">3 秒</option></select></label>
-  <button id="start">① 開始實驗(60 秒)</button>
-  <button id="stop" class="gray">停止</button>
-  <button id="bot" disabled>② 啟動機器人(全組一人按即可)</button>
- </div>
- <p>剩餘時間:<span class="big" id="left">60</span> 秒 | 狀態:<span id="state">待機</span></p>
- <p>「伺服器」資料位置(Topic):<code id="topicShow">-</code></p>
-</div>
+  <section class="card" aria-labelledby="sim-title">
+    <h2 id="sim-title">動畫示範（模擬）</h2>
+    <p>本區完全在瀏覽器本機模擬，不會連線或發布 MQTT 訊息。</p>
+    <div class="canvas-wrap">
+      <canvas id="cvPollPush" width="1000" height="440" aria-label="Poll 與 Push 訊息傳遞動畫"></canvas>
+    </div>
+    <div class="controls">
+      <button class="btn btn-cyan" id="btnStartSim"><i class="fa-solid fa-play" aria-hidden="true"></i> 開始模擬</button>
+      <button class="btn btn-red" id="btnStopSim" disabled><i class="fa-solid fa-stop" aria-hidden="true"></i> 停止</button>
+      <button class="btn btn-ghost" id="btnResetSim"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> 重置</button>
+    </div>
+    <div class="twin-cols">
+      <div>
+        <h3>Poll 模擬統計</h3>
+        <div class="stats-row">
+          <div class="stat-box"><div class="num" id="ppReq">0</div><div class="lbl">請求次數</div></div>
+          <div class="stat-box"><div class="num" id="ppHit">0</div><div class="lbl">有新資料</div></div>
+          <div class="stat-box"><div class="num" id="ppMiss">0</div><div class="lbl">白問</div></div>
+          <div class="stat-box"><div class="num" id="ppWaste" style="color:var(--accent5)">0%</div><div class="lbl">白問比例</div></div>
+        </div>
+        <div class="log-box" id="ppLogPoll" aria-label="Poll 模擬紀錄"></div>
+      </div>
+      <div>
+        <h3>Push 模擬統計</h3>
+        <div class="stats-row">
+          <div class="stat-box"><div class="num" id="psConn">1</div><div class="lbl">連線次數</div></div>
+          <div class="stat-box"><div class="num" id="psPush">0</div><div class="lbl">即時通知</div></div>
+          <div class="stat-box"><div class="num" id="psExtra">0</div><div class="lbl">多餘請求</div></div>
+          <div class="stat-box"><div class="num" id="psDelay" style="color:var(--accent4)">0ms</div><div class="lbl">平均延遲</div></div>
+        </div>
+        <div class="log-box" id="ppLogPush" aria-label="Push 模擬紀錄"></div>
+      </div>
+    </div>
+  </section>
 
-<div class="cols">
- <div class="panel">
-  <h2>Poll:每次都主動詢問</h2>
-  <table>
-   <tr><td>HTTP Request 次數</td><td id="p_req">0</td></tr>
-   <tr><td>開啟連線次數</td><td id="p_conn">0</td></tr>
-   <tr><td>有新資料</td><td id="p_hit">0</td></tr>
-   <tr><td>沒有變化(白問)</td><td id="p_empty">0</td></tr>
-   <tr><td>白問比例</td><td id="p_ratio">-</td></tr>
-   <tr><td>逾時或錯誤</td><td id="p_err">0</td></tr>
-  </table>
-  <div class="log" id="p_log"></div>
- </div>
- <div class="panel">
-  <h2>Push:訂閱一次,有新訊息才通知</h2>
-  <table>
-   <tr><td>額外詢問次數</td><td>0</td></tr>
-   <tr><td>開啟連線次數</td><td id="s_conn">0</td></tr>
-   <tr><td>收到通知次數</td><td id="s_msgs">0</td></tr>
-   <tr><td>無新訊息時的通知</td><td>0</td></tr>
-  </table>
-  <div class="log" id="s_log"></div>
- </div>
-</div>
+  <section class="card" aria-labelledby="experiment-title">
+    <h2 id="experiment-title">真實實驗（連線 HiveMQ）</h2>
+    <div class="callout">此區使用 MQTT.js 連線至 HiveMQ。Broker 上的 Retained message 代表最新資料；Poll 每次新建連線、讀取後立即關閉，模擬 HTTP 一個 Request 對應一個 Response，並非真正的 HTTP。</div>
+    <div class="row">
+      <label>Room<input type="text" id="room" placeholder="例:3A-g1" size="10"></label>
+      <label>Poll 間隔<select id="interval"><option value="5" selected>5 秒</option><option value="10">10 秒</option><option value="3">3 秒</option></select></label>
+      <button class="btn btn-cyan" id="start"><i class="fa-solid fa-play" aria-hidden="true"></i> 開始實驗（60 秒）</button>
+      <button class="btn btn-ghost" id="stop"><i class="fa-solid fa-stop" aria-hidden="true"></i> 停止</button>
+      <button class="btn btn-amber" id="bot" disabled><i class="fa-solid fa-robot" aria-hidden="true"></i> 啟動機器人</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="num" id="left">60</div><div class="lbl">剩餘秒數</div></div>
+      <div class="stat-box"><div class="num" id="state">待機</div><div class="lbl">真實實驗狀態</div></div>
+      <div class="stat-box"><div class="num" id="topicShow">-</div><div class="lbl">伺服器資料位置（Topic）</div></div>
+    </div>
+  </section>
 
-<div class="panel">
- <h2>如何手動發布訊息(不用機器人)</h2>
- <p>開啟「MQTT 客戶端」頁,連線後在 Publish 區域輸入 Topic(上面顯示的 Topic)、勾選 <b>Retain</b>,Message 輸入例如「公告 #1」,按 Publish。</p>
-</div>
+  <div class="twin-cols">
+    <section class="card">
+      <h2>Poll：每次都主動詢問</h2>
+      <table>
+        <tr><td>HTTP Request 次數</td><td id="p_req">0</td></tr>
+        <tr><td>開啟連線次數</td><td id="p_conn">0</td></tr>
+        <tr><td>有新資料</td><td id="p_hit">0</td></tr>
+        <tr><td>沒有變化（白問）</td><td id="p_empty">0</td></tr>
+        <tr><td>白問比例</td><td id="p_ratio">-</td></tr>
+        <tr><td>逾時或錯誤</td><td id="p_err">0</td></tr>
+      </table>
+      <div class="log-box" id="p_log" aria-label="真實 Poll 實驗紀錄"></div>
+    </section>
+    <section class="card">
+      <h2>Push：訂閱一次，有新訊息才通知</h2>
+      <table>
+        <tr><td>額外詢問次數</td><td>0</td></tr>
+        <tr><td>開啟連線次數</td><td id="s_conn">0</td></tr>
+        <tr><td>收到通知次數</td><td id="s_msgs">0</td></tr>
+        <tr><td>無新訊息時的通知</td><td>0</td></tr>
+      </table>
+      <div class="log-box" id="s_log" aria-label="真實 Push 實驗紀錄"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>手動發布訊息</h2>
+    <p>開啟「MQTT 客戶端」頁，連線後在 Publish 區域輸入上方顯示的 Topic，勾選 <b>Retain</b>，Message 可輸入「公告 #1」，再按 Publish。</p>
+    <a class="btn btn-ghost" href="client.html"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i> 前往 MQTT 客戶端</a>
+  </section>
 </main>
 
+<script src="js/anim-pollpush.js"></script>
 <script>
 const BROKER = "wss://broker.hivemq.com:8884/mqtt";
 const DURATION = 60;

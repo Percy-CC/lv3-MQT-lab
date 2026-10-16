@@ -28,11 +28,16 @@
 - 解釋 `git clone` 與 `cd`。
   - 改寫 GitHub Pages 部署步驟為 VS Code Source Control 版本(Stage、Commit、Sync Changes)。
 - 新需求:做一個仿 HiveMQ 的網站,並另設頁面模擬傳統 HTTP,必須保留 Poll。
-  - 建立多頁網站:`index.html`、`client.html`、`poll.html`、`style.css`。
+  - 建立多頁網站:`index.html`、`client.html`、`poll.html` 與共用樣式。
   - 以 `node --check` 檢查兩頁的 JavaScript 語法,沒有錯誤。
   - 未在瀏覽器實測。
   - 工作紙尚未配合多頁網站更新。
 - 建立 `README.md`、`project.md`、`log.md` 以追蹤專案。
+- 統一三個正式頁面的深淺色主題、字體、圖示與導覽；將 Overview、Poll/Push、Topic、Retained 動畫拆成獨立腳本。
+- 首頁加入 Overview 動畫與實驗入口；客戶端加入 Topic 通配符練習與 Retained 動畫；Poll 頁分開呈現本機模擬與 HiveMQ 真實實驗。
+- 保留 MQTT.js 連線設定、Topic 驗證、Poll/機器人流程與結束時清除 Retained 的程式；刪除舊樣式與動畫預覽頁。
+- 驗證：五個 JavaScript 檔通過 `node --check`，三頁無重複 ID；瀏覽器測試深淺色、375px 版面、動畫及 MQTT 連線/訂閱/發布，Console 無錯誤。
+- 待驗證：學校網絡、多裝置負載、GitHub Pages 部署，以及清除 Retained 後重新訂閱確認。
 
 ## 未解決與下一步
 

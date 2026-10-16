@@ -18,13 +18,18 @@
 ├── log.md           工作記錄
 ├── index.html       首頁
 ├── client.html      仿 HiveMQ 的 MQTT 客戶端(Push)
-├── poll.html        HTTP Poll 模擬,與 Push 並排比較
-├── style.css        共用樣式
-└── docs/
-    └── Lab_MessagingServices_MQTT_v3.docx   學生工作紙(含教師附錄)
+├── poll.html        Poll 動畫示範與 HiveMQ 真實實驗
+├── css/
+│   └── theme.css    全站共用主題與元件樣式
+└── js/
+    ├── anim-common.js      動畫共用工具與深淺色模式
+    ├── anim-overview.js    首頁 MQTT 模型動畫
+    ├── anim-pollpush.js    Poll 與 Push 模擬動畫
+    ├── anim-topics.js      Topic 通配符練習
+    └── anim-retained.js    Retained 訊息動畫
 ```
 
-> 注意:`docs/` 內的工作紙目前仍是 v3(單頁 index.html 版本),尚未配合多頁網站更新。詳見 `project.md` 的待辦。
+> 學生工作紙 v3 尚未配合目前的多頁網站更新，且目前不包含在此專案目錄中；後續工作見 `project.md`。
 
 ## 技術
 
@@ -36,15 +41,16 @@
 ## 快速開始
 
 1. 把全部網站檔案放在 repository 最上層。
-2. 用 VS Code 的 Source Control 面板 Stage、Commit、Sync Changes。
-3. GitHub → Settings → Pages → Source 選 Deploy from a branch → Branch 選 `main`,資料夾選 `/ (root)`。
-4. 網址格式:`https://<帳號>.github.io/<repo 名稱>/`。
-5. 課前用學校 Wi-Fi 測試,見 `project.md` 的「課前檢查清單」。
+2. 本機預覽可在專案目錄執行 `python -m http.server 8000`，再開啟 `http://localhost:8000/`。
+3. 用 VS Code 的 Source Control 面板 Stage、Commit、Sync Changes。
+4. GitHub → Settings → Pages → Source 選 Deploy from a branch → Branch 選 `main`，資料夾選 `/ (root)`。
+5. 網址格式：`https://<帳號>.github.io/<repo 名稱>/`。
+6. 課前用學校 Wi-Fi 測試，見 `project.md` 的待辦事項。
 
 ## 使用限制
 
 - 公共 Broker 人人可見,不得輸入個人資料。
-- Poll 為模擬(每次新建連線、讀取 Retained message、立即關閉),並非真正的 HTTP。
+- Poll 動畫示範完全在本機執行；真實實驗以 MQTT 每次新建連線、讀取 Retained message 後立即關閉，模擬 HTTP 請求，並非真正的 HTTP。
 - 標準 MQTT 沒有 Queue 模型,任務 3 以角色扮演處理。
 
 ## 相關文件
