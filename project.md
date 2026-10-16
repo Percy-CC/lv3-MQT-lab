@@ -23,7 +23,7 @@
 | 託管用 GitHub Pages | 已有 VS Code 與 GitHub | 已採用 |
 | Firebase Realtime Database 方案 | 曾評估,改用 HiveMQ 後不再需要 | 已放棄 |
 | Cloudflare Workers 方案 | 曾評估,需寫後端、較複雜 | 未採用 |
-| 任務 3 Queue 用便利貼角色扮演 | 標準 MQTT 沒有 Queue | 仍用紙,待決定 |
+| 任務 3 Queue 用便利貼角色扮演 | 標準 MQTT 沒有 Queue；實作需保留實體角色互動 | 已採用；動畫作投影預演 |
 
 ## 3. 任務結構(約 60 分鐘)
 
@@ -32,7 +32,7 @@
 | 0 | 5 分鐘 | 連線 Broker | `client.html` | Broker 是中介 |
 | 1 | 10 分鐘 | Poll vs Push | `poll.html` | Poll 浪費資源、延遲 |
 | 2 | 15 分鐘 | Topic 訂閱、發布、通配符 | `client.html` | Push、一對多 |
-| 3 | 10 分鐘 | Queue 角色扮演 | 便利貼 | 一則訊息只給一人 |
+| 3 | 10 分鐘 | Queue 角色扮演 | 便利貼；`queue.html` 動畫預演 | 一則訊息只給一人 |
 | 4 | 10 分鐘 | 離線漏收、Retained | `client.html` | 訊息暫存與解耦 |
 | 5 | 10 分鐘 | 總結作答 | 工作紙 | 鞏固 |
 
@@ -43,12 +43,15 @@
 | `index.html` | 首頁、MQTT 模型概覽動畫與實驗入口 | 已整合並通過瀏覽器測試 |
 | `client.html` | Connection、Publish、Subscriptions、Messages、Topic 練習與 Retained 動畫 | 已整合；MQTT 連線、訂閱、發布測試通過 |
 | `poll.html` | 本機 Poll/Push 動畫、HiveMQ 實驗、機器人與 Retained 清除 | 已整合並通過瀏覽器測試 |
+| `queue.html` | Topic / Queue 對比、任務 3 角色扮演預演與比較表 | 已整合並通過互動測試 |
 | `css/theme.css` | 全站深淺色主題與共用元件樣式 | 已完成 |
 | `js/anim-common.js` | 動畫共用工具與色彩模式初始化 | 已完成 |
 | `js/anim-overview.js` | 首頁 MQTT 模型動畫 | 已完成 |
 | `js/anim-pollpush.js` | Poll 與 Push 模擬動畫 | 已完成 |
 | `js/anim-topics.js` | Topic 通配符練習 | 已完成 |
 | `js/anim-retained.js` | Retained 訊息動畫 | 已完成 |
+| `js/anim-queue-compare.js` | Topic 複製與 Queue 派發比較動畫 | 已完成 |
+| `js/anim-queue-roleplay.js` | 便利貼訂單領取、自動示範與紀錄表 | 已完成 |
 
 ## 5. 最近驗證
 
@@ -58,6 +61,7 @@
 - `poll.html` 已測試實驗初始化、機器人啟動與停止；實際清除 Retained 後重新訂閱確認仍列於待辦。
 - 五個 JavaScript 檔通過 `node --check`；三頁 ID 唯一，Console 與編輯器錯誤檢查無錯誤。
 - 尚未在學校 Wi-Fi、多裝置環境或 GitHub Pages 上驗證。
+- `queue.html` 瀏覽器測試：Topic 3 張訂單 × 3 位職員各收到 3 次；Queue 3 張訂單合計處理 3 次；兩位職員領完 6 張後紀錄表各列 3 張，領取按鈕停用；375px 無水平溢出、Console 無 JavaScript 錯誤。
 
 ## 6. 工作紙狀態
 
@@ -72,7 +76,7 @@
 - [ ] 確認 Retained 訊息被清除(結束後再開同一 Room,Poll 應顯示無資料)。
 - [ ] 更新工作紙:任務 0、2、4 改用 `client.html`;任務 1 改用 `poll.html`,指標改為「HTTP Request 次數」、「200 有新資料」、「304 沒有變化」、「開啟連線次數」。
 - [ ] 把教師附錄的託管步驟改為 VS Code Source Control 版本。
-- [ ] 決定任務 3 是否改為不用紙(例如教師投影演示加討論)。
+- [ ] 試教時確認任務 3 的便利貼角色扮演與網頁投影預演是否配合順暢。
 - [ ] 試教後按學生反應調整時間與難度。
 
 ## 8. 風險與未知項目

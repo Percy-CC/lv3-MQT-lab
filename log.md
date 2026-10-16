@@ -38,6 +38,10 @@
 - 保留 MQTT.js 連線設定、Topic 驗證、Poll/機器人流程與結束時清除 Retained 的程式；刪除舊樣式與動畫預覽頁。
 - 驗證：五個 JavaScript 檔通過 `node --check`，三頁無重複 ID；瀏覽器測試深淺色、375px 版面、動畫及 MQTT 連線/訂閱/發布，Console 無錯誤。
 - 待驗證：學校網絡、多裝置負載、GitHub Pages 部署，以及清除 Retained 後重新訂閱確認。
+- 新增 `queue.html` 任務 3 頁面與 Queue 導覽；首頁新增入口卡。
+- 新增 Topic / Queue 派發比較動畫，以及便利貼訂單角色扮演預演；加入比較表、參考答案與 SMQ 說明。
+- 瀏覽器驗證：Topic 發布 3 張訂單時 3 位職員各收到 3 次；Queue 發布 3 張時合計只處理 3 次；兩位職員領取全部 6 張後按鈕停用，紀錄表各列 3 張。
+- 自動示範輪流領取完成；375px 頁面無水平溢出，JavaScript Console 無錯誤。
 
 ## 未解決與下一步
 

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Queue 模型角色扮演</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="logo"><i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i> MQTT Lab</div>
+  <nav class="tab-bar" aria-label="主要導覽">
+    <a class="tab-btn" href="index.html"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> 首頁</a>
+    <a class="tab-btn" href="client.html"><i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i> MQTT Push</a>
+    <a class="tab-btn" href="poll.html"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> HTTP Poll</a>
+    <a class="tab-btn active" href="queue.html" aria-current="page"><i class="fa-solid fa-list-ol" aria-hidden="true"></i> Queue</a>
+  </nav>
+</header>
+<main>
+  <h1 class="page-title">Queue 模型角色扮演(任務 3)</h1>
+  <p class="page-intro">Queue 的每則訊息只由一人處理；Topic 則會把訊息送給每位訂閱者。</p>
+  <div class="callout">本頁用動畫預演或投影講解；實際的角色扮演仍使用便利貼，不使用電腦。動畫只在本機模擬，不會連線 HiveMQ。</div>
+
+  <section class="card" aria-labelledby="q-steps-title">
+    <h2 id="q-steps-title">角色扮演步驟</h2>
+    <ol class="q-steps">
+      <li>一位組員扮演「隊列」，把 6 張便利貼排成一列，每張寫一份訂單，例如「訂單 1：珍珠奶茶」。</li>
+      <li>至少兩位組員扮演職員，輪流向「隊列」領取訂單；其餘組員負責記錄。</li>
+      <li>每張訂單只可交給其中一人。被領走的訂單從隊列移除。</li>
+      <li>記錄每位職員處理了哪些訂單。</li>
+    </ol>
+  </section>
+
+  <section class="card" aria-labelledby="q-compare-title">
+    <h2 id="q-compare-title">動畫 A：Topic 與 Queue 對比</h2>
+    <p>發送訂單並觀察 Broker 如何分派。Topic 會複製給每位 Worker；Queue 會逐張交給一位空閒的 Worker。</p>
+    <div class="canvas-wrap">
+      <canvas id="cvQueueCompare" width="1000" height="460" aria-label="Topic 將每張訂單送給所有職員；Queue 每次只派給一位職員的比較動畫"></canvas>
+    </div>
+    <div class="controls q-mode-switch" role="group" aria-label="選擇訊息模型">
+      <button class="btn btn-cyan" id="btnModeTopic" aria-pressed="true">Topic</button>
+      <button class="btn btn-ghost" id="btnModeQueue" aria-pressed="false">Queue</button>
+    </div>
+    <div class="controls">
+      <button class="btn btn-amber" id="btnSendOrder"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i> 發送訂單</button>
+      <button class="btn btn-green" id="btnAddWorker"><i class="fa-solid fa-plus" aria-hidden="true"></i> 增加職員</button>
+      <button class="btn btn-ghost" id="btnRemoveWorker"><i class="fa-solid fa-minus" aria-hidden="true"></i> 減少職員</button>
+      <button class="btn btn-ghost" id="btnResetQueueCompare"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> 重置</button>
+    </div>
+    <p class="q-hint" id="qCompareHint" aria-live="polite">Topic：收到次數 = 訂單數 × 訂閱者數</p>
+    <div class="stats-row q-compare-stats">
+      <div class="stat-box"><div class="num" id="qOrderTotal">0</div><div class="lbl">訂單總數</div></div>
+      <div class="stat-box"><div class="num" id="qHandledTotal">0</div><div class="lbl">被處理的總次數</div></div>
+      <div class="q-worker-stats" id="qWorkerStats" aria-live="polite"></div>
+    </div>
+    <div class="log-box" id="qCompareLog" aria-label="Topic 與 Queue 動畫紀錄" aria-live="polite"></div>
+  </section>
+
+  <section class="card" aria-labelledby="q-roleplay-title">
+    <h2 id="q-roleplay-title">動畫 B：角色扮演預演</h2>
+    <p>職員輪流領取隊列中的訂單；每張便利貼只會交給一位職員。</p>
+    <div class="canvas-wrap">
+      <canvas id="cvRolePlay" width="1000" height="420" aria-label="六張訂單便利貼由隊列移到領取它們的職員旁"></canvas>
+    </div>
+    <div class="row q-worker-select-row">
+      <label for="workerCount">職員人數
+        <select id="workerCount">
+          <option value="2" selected>2 位</option>
+          <option value="3">3 位</option>
+          <option value="4">4 位</option>
+          <option value="5">5 位</option>
+        </select>
+      </label>
+      <button class="btn btn-cyan" id="btnAutoPlay"><i class="fa-solid fa-play" aria-hidden="true"></i> 自動示範</button>
+      <button class="btn btn-ghost" id="btnResetRolePlay"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> 重置</button>
+    </div>
+    <div class="controls q-claim-buttons" id="claimButtons" aria-label="職員領取訂單"></div>
+    <p class="q-role-status" id="roleStatus" aria-live="polite">隊列有 6 張訂單，請職員領取。</p>
+    <div class="q-record-layout">
+      <table id="recordTable" class="q-record-table">
+        <caption class="q-visually-hidden">每位職員處理的訂單記錄</caption>
+        <thead><tr><th scope="col">職員</th><th scope="col">處理的訂單</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="q-record-note">這就是工作紙第 4 步要記錄的內容。</p>
+    </div>
+  </section>
+
+
+  <div class="callout q-cloud-callout">
+    <strong>對應雲服務</strong>
+    <ul>
+      <li>阿里雲 Simple Message Queue（SMQ）同時支援 Queue 與 Topic 兩種模型。</li>
+      <li>標準 MQTT 沒有 Queue 模型，所以本任務用角色扮演代替。</li>
+    </ul>
+  </div>
+</main>
+<script src="js/anim-common.js"></script>
+<script src="js/anim-queue-compare.js"></script>
+<script src="js/anim-queue-roleplay.js"></script>
+</body>
+</html>

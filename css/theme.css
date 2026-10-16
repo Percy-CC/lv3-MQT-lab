@@ -335,3 +335,41 @@ td:last-child { font-family: var(--font-mono); }
   .row > label { flex: 1 1 130px; }
   .row > .chk { flex: 0 0 auto; }
 }
+
+/* Queue page */
+.q-steps { margin: 0; padding-left: 24px; }
+.q-steps li { margin: 7px 0; padding-left: 3px; }
+.q-mode-switch { margin-top: 14px; }
+.q-hint { margin: 10px 0 0; color: var(--accent3); font-family: var(--font-mono); font-weight: 600; }
+.q-worker-stats { display: contents; }
+.q-worker-stat { min-width: 0; }
+.q-compare-stats { grid-template-columns: repeat(auto-fit, minmax(min(125px, 100%), 1fr)); }
+.q-worker-stat .lbl { overflow-wrap: anywhere; }
+.q-worker-select-row { margin-top: 12px; }
+.q-worker-select-row select { min-width: 120px; }
+.q-claim-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); }
+.q-role-status { margin: 12px 0 0; padding: 9px 11px; border-left: 4px solid var(--accent4); background: var(--bg-deep); color: var(--text); }
+.q-record-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(160px, 1fr); gap: 14px; align-items: start; margin-top: 12px; }
+.q-record-table { table-layout: fixed; }
+.q-record-table th:first-child { width: 24%; }
+.q-record-table td { overflow-wrap: anywhere; }
+.q-record-note { margin: 0; padding: 10px; border-left: 3px solid var(--accent3); color: var(--text-dim); }
+.q-comparison-table { table-layout: fixed; }
+.q-comparison-table th:first-child { width: 38%; }
+.q-comparison-table th, .q-comparison-table td { overflow-wrap: anywhere; }
+.q-comparison-table td { height: 48px; }
+.q-answer { margin-top: 14px; color: var(--text); }
+.q-answer summary { width: fit-content; color: var(--accent); cursor: pointer; }
+.q-answer p { margin: 9px 0 0; }
+.q-cloud-callout { border-left-color: var(--accent4); }
+.q-cloud-callout ul { margin: 7px 0 0; padding-left: 21px; }
+.q-cloud-callout li + li { margin-top: 5px; }
+.q-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 680px) {
+  .q-steps { padding-left: 21px; }
+  .q-compare-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .q-record-layout { grid-template-columns: 1fr; gap: 8px; }
+  .q-comparison-table th:first-child { width: 40%; }
+  .q-comparison-table th, .q-comparison-table td { padding: 7px 5px; font-size: 12px; }
+}

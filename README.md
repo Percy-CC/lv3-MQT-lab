@@ -7,6 +7,7 @@
 - 比較 Poll 與 Push 通信模式。
 - 理解 Topic 模型(一對多)與 Queue 模型(一則訊息只給一人)。
 - 理解雲消息服務為何要暫存訊息、令服務解耦。
+- 以 `queue.html` 預演任務 3 的便利貼角色扮演，比較 Topic 與 Queue。
 - 對應原講義的 Labex:Use Alibaba Cloud Message Service(需要雲帳戶與 SDK,新 Lab 作為免帳戶的替代或預備活動)。
 
 ## 專案結構
@@ -19,6 +20,7 @@
 ├── index.html       首頁
 ├── client.html      仿 HiveMQ 的 MQTT 客戶端(Push)
 ├── poll.html        Poll 動畫示範與 HiveMQ 真實實驗
+├── queue.html       Topic / Queue 比較與任務 3 角色扮演預演
 ├── css/
 │   └── theme.css    全站共用主題與元件樣式
 └── js/
@@ -26,7 +28,9 @@
     ├── anim-overview.js    首頁 MQTT 模型動畫
     ├── anim-pollpush.js    Poll 與 Push 模擬動畫
     ├── anim-topics.js      Topic 通配符練習
-    └── anim-retained.js    Retained 訊息動畫
+    ├── anim-retained.js    Retained 訊息動畫
+    ├── anim-queue-compare.js Topic / Queue 派發比較動畫
+    └── anim-queue-roleplay.js 任務 3 便利貼領取預演動畫
 ```
 
 > 學生工作紙 v3 尚未配合目前的多頁網站更新，且目前不包含在此專案目錄中；後續工作見 `project.md`。
@@ -51,6 +55,7 @@
 
 - 公共 Broker 人人可見,不得輸入個人資料。
 - Poll 動畫示範完全在本機執行；真實實驗以 MQTT 每次新建連線、讀取 Retained message 後立即關閉，模擬 HTTP 請求，並非真正的 HTTP。
+- `queue.html` 的兩個動畫只在瀏覽器本機執行，不會連線 HiveMQ；課堂角色扮演仍使用便利貼。
 - 標準 MQTT 沒有 Queue 模型,任務 3 以角色扮演處理。
 
 ## 相關文件
