@@ -32,8 +32,8 @@
   <table>
    <tr><td>HTTP Request 次數</td><td id="p_req">0</td></tr>
    <tr><td>開啟連線次數</td><td id="p_conn">0</td></tr>
-   <tr><td>200 有新資料</td><td id="p_hit">0</td></tr>
-   <tr><td>304 沒有變化(白問)</td><td id="p_empty">0</td></tr>
+   <tr><td>有新資料</td><td id="p_hit">0</td></tr>
+   <tr><td>沒有變化(白問)</td><td id="p_empty">0</td></tr>
    <tr><td>白問比例</td><td id="p_ratio">-</td></tr>
    <tr><td>逾時或錯誤</td><td id="p_err">0</td></tr>
   </table>
@@ -93,9 +93,9 @@ async function doPoll(){
   const r = await pollOnce(topic);
   if(!running){ busy = false; return; }
   if(r.kind === "data" && r.text !== last){
-    last = r.text; st.hit++; addLog("p_log", `${nowStr()} GET → 200 有新資料:${r.text}`);
+    last = r.text; st.hit++; addLog("p_log", `${nowStr()} GET → 有新資料:${r.text}`);
   } else if(r.kind === "data"){
-    st.empty++; addLog("p_log", `${nowStr()} GET → 304 沒有變化(白問)`);
+    st.empty++; addLog("p_log", `${nowStr()} GET → 沒有變化(白問)`);
   } else if(r.kind === "timeout"){
     st.empty++; addLog("p_log", `${nowStr()} GET → 暫無資料(白問)`);
   } else {

@@ -64,6 +64,8 @@
 <script>
 const $ = id => document.getElementById(id);
 const COLORS = ["#1aa3d6","#e67e22","#27ae60","#8e44ad","#c0392b","#16a085"];
+const PREFIX = "cc-lab/";
+const okTopic = t => t.startsWith(PREFIX) && t.length > PREFIX.length;
 let client = null;
 const subs = new Map();
 let colorIdx = 0;
@@ -128,6 +130,7 @@ $("btnConn").onclick = () => {
 
 $("btnSub").onclick = () => {
   const t = $("subTopic").value.trim(); if(!t || !client) return;
+  if(!okTopic(t)){ alert("Topic 必須以 cc-lab/ 開頭,例如 cc-lab/3A/g1/news"); return; }
   if(subs.has(t)){ alert("已訂閱此 Topic"); return; }
   client.subscribe(t, { qos: Number($("subQos").value) }, err => {
     if(err){ alert("訂閱失敗:" + err.message); return; }
@@ -138,6 +141,7 @@ $("btnSub").onclick = () => {
 $("btnPub").onclick = () => {
   const t = $("pubTopic").value.trim();
   if(!t || !client){ return; }
+  if(!okTopic(t)){ alert("Topic 必須以 cc-lab/ 開頭,例如 cc-lab/3A/g1/news"); return; }
   if(t === "testtopic/1" && !confirm("Topic 是預設值,可能與其他人混在一起。仍要發布?")) return;
   client.publish(t, $("pubMsg").value, { qos: Number($("pubQos").value), retain: $("pubRetain").checked });
 };
