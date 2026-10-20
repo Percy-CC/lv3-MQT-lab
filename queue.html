@@ -37,25 +37,56 @@
 
   <section class="card" aria-labelledby="q-compare-title">
     <h2 id="q-compare-title">動畫 A：Topic 與 Queue 對比</h2>
-    <p>發送訂單並觀察 Broker 如何分派。Topic 會複製給每位 Worker；Queue 會逐張交給一位空閒的 Worker。</p>
+    <p>同時把同一張訂單送進兩條軌道：Topic 會複製給每位職員；Queue 會先排隊，再交給一位空閒的職員。</p>
     <div class="canvas-wrap">
-      <canvas id="cvQueueCompare" width="1000" height="460" aria-label="Topic 將每張訂單送給所有職員；Queue 每次只派給一位職員的比較動畫"></canvas>
+      <canvas id="cvQueueCompare" width="1000" height="600" aria-label="上方 Topic 軌道把每張訂單複製給所有職員；下方 Queue 軌道讓訂單排隊並逐張派給一位職員"></canvas>
     </div>
-    <div class="controls q-mode-switch" role="group" aria-label="選擇訊息模型">
-      <button class="btn btn-cyan" id="btnModeTopic" aria-pressed="true">Topic</button>
-      <button class="btn btn-ghost" id="btnModeQueue" aria-pressed="false">Queue</button>
-    </div>
-    <div class="controls">
+    <div class="controls q-compare-controls">
       <button class="btn btn-amber" id="btnSendOrder"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i> 發送訂單</button>
       <button class="btn btn-green" id="btnAddWorker"><i class="fa-solid fa-plus" aria-hidden="true"></i> 增加職員</button>
       <button class="btn btn-ghost" id="btnRemoveWorker"><i class="fa-solid fa-minus" aria-hidden="true"></i> 減少職員</button>
+      <button class="btn btn-cyan" id="btnPauseCompare" aria-pressed="false">暫停</button>
+      <label class="q-speed-control" for="compareSpeed">速度
+        <select id="compareSpeed">
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+        </select>
+      </label>
       <button class="btn btn-ghost" id="btnResetQueueCompare"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> 重置</button>
     </div>
-    <p class="q-hint" id="qCompareHint" aria-live="polite">Topic：收到次數 = 訂單數 × 訂閱者數</p>
+    <p class="q-hint" id="qCompareHint">Topic：收到次數 = 訂單數 × 職員數；Queue：收到次數 = 已派訂單數。</p>
+    <p class="q-role-status" id="qCompareStatus" aria-live="polite">準備好後按「發送訂單」開始對照。</p>
     <div class="stats-row q-compare-stats">
       <div class="stat-box"><div class="num" id="qOrderTotal">0</div><div class="lbl">訂單總數</div></div>
-      <div class="stat-box"><div class="num" id="qHandledTotal">0</div><div class="lbl">被處理的總次數</div></div>
+      <div class="stat-box"><div class="num" id="qHandledTotal">0</div><div class="lbl">Queue 已派訂單數</div></div>
       <div class="q-worker-stats" id="qWorkerStats" aria-live="polite"></div>
+    </div>
+    <div class="q-receipt-summary" aria-label="收到次數統計">
+      <p>Topic：收到次數 = 訂單數 × 職員數 = <strong id="qTopicReceiptTotal">0</strong> 次</p>
+      <p>Queue：收到次數 = 訂單數 = <strong id="qQueueReceiptTotal">0</strong> 次</p>
+    </div>
+    <div class="twin-cols q-compare-tables">
+      <div>
+        <h3>Topic：誰收到哪張訂單</h3>
+        <div class="q-table-scroll">
+          <table class="q-comparison-table" id="qTopicMatrix">
+            <caption class="q-visually-hidden">Topic 每張訂單送給所有職員的對照表</caption>
+            <thead><tr><th scope="col">訂單</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h3>Queue：誰收到哪張訂單</h3>
+        <div class="q-table-scroll">
+          <table class="q-comparison-table" id="qQueueMatrix">
+            <caption class="q-visually-hidden">Queue 每張訂單只交給一位職員的對照表</caption>
+            <thead><tr><th scope="col">訂單</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div class="log-box" id="qCompareLog" aria-label="Topic 與 Queue 動畫紀錄" aria-live="polite"></div>
   </section>
@@ -63,10 +94,11 @@
   <section class="card" aria-labelledby="q-roleplay-title">
     <h2 id="q-roleplay-title">動畫 B：角色扮演預演</h2>
     <p>職員輪流領取隊列中的訂單；每張便利貼只會交給一位職員。</p>
+    <p class="q-role-remaining" id="roleRemaining" aria-live="polite">隊列剩餘 6 / 6</p>
     <div class="canvas-wrap">
-      <canvas id="cvRolePlay" width="1000" height="420" aria-label="六張訂單便利貼由隊列移到領取它們的職員旁"></canvas>
+      <canvas id="cvRolePlay" width="1000" height="560" aria-label="Queue 輸送帶由隊尾通往隊首；職員領取隊首便利貼後，記錄卡留在職員旁"></canvas>
     </div>
-    <div class="row q-worker-select-row">
+    <div class="row q-worker-select-row q-role-controls">
       <label for="workerCount">職員人數
         <select id="workerCount">
           <option value="2" selected>2 位</option>
@@ -75,16 +107,27 @@
           <option value="5">5 位</option>
         </select>
       </label>
+      <button class="btn btn-ghost" id="btnStepRolePlay">單步</button>
       <button class="btn btn-cyan" id="btnAutoPlay"><i class="fa-solid fa-play" aria-hidden="true"></i> 自動示範</button>
+      <button class="btn btn-ghost" id="btnPauseRolePlay" aria-pressed="false">暫停</button>
+      <label class="q-speed-control" for="roleSpeed">速度
+        <select id="roleSpeed">
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+        </select>
+      </label>
       <button class="btn btn-ghost" id="btnResetRolePlay"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> 重置</button>
     </div>
     <div class="controls q-claim-buttons" id="claimButtons" aria-label="職員領取訂單"></div>
     <p class="q-role-status" id="roleStatus" aria-live="polite">隊列有 6 張訂單，請職員領取。</p>
+    <p class="q-complete-banner" id="roleCompleteBanner" role="status" hidden>全部 6 張已處理，每張只交給 1 人</p>
     <div class="q-record-layout">
       <table id="recordTable" class="q-record-table">
         <caption class="q-visually-hidden">每位職員處理的訂單記錄</caption>
         <thead><tr><th scope="col">職員</th><th scope="col">處理的訂單</th></tr></thead>
         <tbody></tbody>
+        <tfoot><tr><th scope="row">合計</th><td id="recordTotal">6 張</td></tr></tfoot>
       </table>
       <p class="q-record-note">這就是工作紙第 4 步要記錄的內容。</p>
     </div>

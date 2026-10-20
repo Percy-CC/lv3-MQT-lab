@@ -245,6 +245,8 @@ main {
 .legend .dot { display: inline-block; width: 10px; height: 10px; flex: 0 0 auto; border-radius: 50%; }
 
 label { display: flex; flex-direction: column; gap: 4px; min-width: 0; color: var(--text-dim); font-size: 13px; }
+.anim-speed-control { flex-direction: row; align-items: center; gap: 7px; min-height: 38px; color: var(--text); font-weight: 600; }
+.anim-speed-control select { min-height: 38px; padding: 6px 9px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg-deep); color: var(--text); font: inherit; }
 input[type="text"], input[type="password"], input[type="number"], select, textarea {
   max-width: 100%;
   min-height: 36px;
@@ -339,25 +341,53 @@ td:last-child { font-family: var(--font-mono); }
 /* Queue page */
 .q-steps { margin: 0; padding-left: 24px; }
 .q-steps li { margin: 7px 0; padding-left: 3px; }
-.q-mode-switch { margin-top: 14px; }
 .q-hint { margin: 10px 0 0; color: var(--accent3); font-family: var(--font-mono); font-weight: 600; }
+.light .q-hint { color: #92400e; }
 .q-worker-stats { display: contents; }
 .q-worker-stat { min-width: 0; }
 .q-compare-stats { grid-template-columns: repeat(auto-fit, minmax(min(125px, 100%), 1fr)); }
+.light .q-compare-stats .num { color: #0369a1; }
 .q-worker-stat .lbl { overflow-wrap: anywhere; }
+.q-compare-controls { align-items: center; }
+.q-speed-control { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; color: var(--text); font-weight: 600; }
+.q-speed-control select { min-height: 38px; padding: 6px 9px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg-deep); color: var(--text); font: inherit; }
+.q-receipt-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.q-receipt-summary p { margin: 0; padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-deep); font-size: 16px; font-weight: 600; }
+.q-receipt-summary strong { color: var(--accent); font-family: var(--font-mono); font-size: 24px; }
+.light .q-receipt-summary strong { color: #0369a1; }
+.q-compare-tables > div { min-width: 0; }
+.q-compare-tables h3 { margin: 0 0 7px; color: var(--text-bright); font-size: 14px; }
+.q-table-scroll { max-width: 100%; overflow-x: auto; }
 .q-worker-select-row { margin-top: 12px; }
 .q-worker-select-row select { min-width: 120px; }
+.q-role-remaining { margin: 12px 0 8px; color: var(--accent); font-family: var(--font-mono); font-size: 24px; font-weight: 700; }
+.light .q-role-remaining { color: #0369a1; }
+.q-role-controls { align-items: center; }
+.q-role-controls label { color: var(--text); font-weight: 600; }
+.q-role-controls select { min-height: 38px; padding: 6px 9px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg-deep); color: var(--text); font: inherit; }
 .q-claim-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); }
+.q-claim-button { border: 2px solid var(--q-worker-color); background: var(--bg-deep); color: var(--text); }
+.q-claim-button:hover:not(:disabled) { border-color: var(--q-worker-color); color: var(--text); box-shadow: 0 0 10px color-mix(in srgb, var(--q-worker-color) 35%, transparent); }
+.q-worker-badge { display: inline-grid; width: 24px; height: 24px; flex: 0 0 24px; place-items: center; margin-right: 6px; border-radius: 50%; background: var(--q-worker-color); color: #fff; font-family: var(--font-mono); font-size: 12px; font-weight: 700; line-height: 1; vertical-align: middle; }
 .q-role-status { margin: 12px 0 0; padding: 9px 11px; border-left: 4px solid var(--accent4); background: var(--bg-deep); color: var(--text); }
+.q-complete-banner { margin: 12px 0 0; padding: 13px; border: 2px solid var(--accent4); border-radius: 6px; background: color-mix(in srgb, var(--accent4) 18%, var(--bg-deep)); color: var(--text-bright); font-size: 18px; font-weight: 700; text-align: center; }
 .q-record-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(160px, 1fr); gap: 14px; align-items: start; margin-top: 12px; }
 .q-record-table { table-layout: fixed; }
 .q-record-table th:first-child { width: 24%; }
 .q-record-table td { overflow-wrap: anywhere; }
+.q-record-table tbody th { vertical-align: middle; }
+.q-record-table tfoot th, .q-record-table tfoot td { border-top: 2px solid var(--border); color: var(--text-bright); font-weight: 700; }
+.q-record-latest { animation: q-record-highlight 1.4s ease-out; }
+@keyframes q-record-highlight { 0%, 55% { background: color-mix(in srgb, var(--accent3) 28%, var(--bg-card)); } 100% { background: transparent; } }
 .q-record-note { margin: 0; padding: 10px; border-left: 3px solid var(--accent3); color: var(--text-dim); }
 .q-comparison-table { table-layout: fixed; }
 .q-comparison-table th:first-child { width: 38%; }
 .q-comparison-table th, .q-comparison-table td { overflow-wrap: anywhere; }
 .q-comparison-table td { height: 48px; }
+.q-comparison-table th, .q-comparison-table td { padding: 7px 5px; text-align: center; }
+.q-comparison-table tbody th { color: var(--text); font-family: var(--font-mono); }
+.q-comparison-table td.q-received { color: var(--accent4); font-size: 17px; font-weight: 700; }
+.light .q-comparison-table td.q-received { color: #047857; }
 .q-answer { margin-top: 14px; color: var(--text); }
 .q-answer summary { width: fit-content; color: var(--accent); cursor: pointer; }
 .q-answer p { margin: 9px 0 0; }
@@ -369,7 +399,17 @@ td:last-child { font-family: var(--font-mono); }
 @media (max-width: 680px) {
   .q-steps { padding-left: 21px; }
   .q-compare-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .q-receipt-summary { grid-template-columns: 1fr; }
+  .q-receipt-summary p { font-size: 14px; }
+  .q-compare-tables { grid-template-columns: 1fr; }
+  .q-comparison-table { font-size: 12px; }
+  .q-role-remaining { font-size: 22px; }
+  .q-claim-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .q-record-layout { grid-template-columns: 1fr; gap: 8px; }
   .q-comparison-table th:first-child { width: 40%; }
   .q-comparison-table th, .q-comparison-table td { padding: 7px 5px; font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .q-record-latest { animation: none; }
 }

@@ -1,6 +1,7 @@
 (function() {
   const canvas = document.getElementById('cvPollPush');
   const ctx = canvas.getContext('2d');
+  const speedSelect = document.getElementById('pollPushSpeed');
   let W, H, DPR;
   let running = false;
   let simTime = 0;
@@ -15,6 +16,7 @@
   let pushNotifs = 0;
   let pushArrows = [];
   let pushDelays = [];
+  let speed = 1;
   const serverX = 0.5;
 
   function resize() {
@@ -101,7 +103,7 @@
     lastFrame = ts;
 
     if (running) {
-      simTime += dt;
+      simTime += dt * speed;
       if (simTime >= 30) {
         running = false;
         document.getElementById('btnStartSim').disabled = false;
@@ -181,7 +183,7 @@
 
     for (let i = pollArrows.length - 1; i >= 0; i--) {
       const a = pollArrows[i];
-      a.t += dt * 0.8;
+      a.t += dt * speed * 0.8;
       if (a.t >= 2) { pollArrows.splice(i, 1); continue; }
       if (a.t < 1) {
         drawArrow(pollClientX, pollY, pollServerX, pollY, a.t, '#f59e0b', false, false);
@@ -212,7 +214,7 @@
 
     for (let i = pushArrows.length - 1; i >= 0; i--) {
       const a = pushArrows[i];
-      a.t += dt * 1.2;
+      a.t += dt * speed * 1.2;
       if (a.t >= 1) { pushArrows.splice(i, 1); continue; }
       drawArrow(pushServerX, pushY, pushClientX, pushY, a.t, '#00e5ff', true, true);
     }
@@ -289,6 +291,9 @@
     document.getElementById('btnStopSim').disabled = true;
   });
   document.getElementById('btnResetSim').addEventListener('click', resetSim);
+  speedSelect.addEventListener('change', () => {
+    speed = Number(speedSelect.value);
+  });
 
   window.addEventListener('resize', () => resize());
   resize();

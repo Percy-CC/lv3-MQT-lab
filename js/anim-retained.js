@@ -1,6 +1,7 @@
 (function() {
   const canvas = document.getElementById('cvRetained');
   const ctx2 = canvas.getContext('2d');
+  const speedSelect = document.getElementById('retainedSpeed');
   let W, H, DPR;
   let animPhase = -1;
   let phaseTime = 0;
@@ -8,6 +9,7 @@
   let storedMsg = null;
   let subConnected = false;
   let lastTs = 0;
+  let speed = 1;
   const timelineEl = document.getElementById('retainedTimeline');
 
   const steps = [
@@ -45,7 +47,7 @@
 
   function drawRetained(ts) {
     if (!lastTs) lastTs = ts;
-    const dt = (ts - lastTs) / 1000;
+    const dt = (ts - lastTs) / 1000 * speed;
     lastTs = ts;
 
     if (animPhase >= 0 && animPhase < steps.length) {
@@ -193,6 +195,9 @@
     triggerPhase(0);
   });
   document.getElementById('btnResetRetained').addEventListener('click', resetRetained);
+  speedSelect.addEventListener('change', () => {
+    speed = Number(speedSelect.value);
+  });
 
   window.addEventListener('resize', resize);
   resize();

@@ -40,18 +40,18 @@
 
 | 檔案 | 功能 | 狀態 |
 |---|---|---|
-| `index.html` | 首頁、MQTT 模型概覽動畫與實驗入口 | 已整合並通過瀏覽器測試 |
-| `client.html` | Connection、Publish、Subscriptions、Messages、Topic 練習與 Retained 動畫 | 已整合；MQTT 連線、訂閱、發布測試通過 |
-| `poll.html` | 本機 Poll/Push 動畫、HiveMQ 實驗、機器人與 Retained 清除 | 已整合並通過瀏覽器測試 |
-| `queue.html` | Topic / Queue 對比、任務 3 角色扮演預演與比較表 | 已整合並通過互動測試 |
+| `index.html` | 首頁、MQTT 模型概覽動畫（可調 0.5× / 1× / 2×）與實驗入口 | 已整合並通過瀏覽器測試 |
+| `client.html` | Connection、Publish、Subscriptions、Messages、Topic 練習與 Retained 動畫（可調 0.5× / 1× / 2×） | 已整合；MQTT 連線、訂閱、發布測試通過 |
+| `poll.html` | 本機 Poll/Push 動畫（可調 0.5× / 1× / 2×）、HiveMQ 實驗、機器人與 Retained 清除 | 已整合並通過瀏覽器測試 |
+| `queue.html` | Topic / Queue 雙軌對比及任務 3 角色扮演預演；兩個動畫均可調 0.5× / 1× / 2× | 已整合並通過互動測試 |
 | `css/theme.css` | 全站深淺色主題與共用元件樣式 | 已完成 |
 | `js/anim-common.js` | 動畫共用工具與色彩模式初始化 | 已完成 |
 | `js/anim-overview.js` | 首頁 MQTT 模型動畫 | 已完成 |
 | `js/anim-pollpush.js` | Poll 與 Push 模擬動畫 | 已完成 |
 | `js/anim-topics.js` | Topic 通配符練習 | 已完成 |
 | `js/anim-retained.js` | Retained 訊息動畫 | 已完成 |
-| `js/anim-queue-compare.js` | Topic 複製與 Queue 派發比較動畫 | 已完成 |
-| `js/anim-queue-roleplay.js` | 便利貼訂單領取、自動示範與紀錄表 | 已完成 |
+| `js/anim-queue-compare.js` | Topic 複製與 Queue 派單雙軌動畫、收件對照表及統計 | 已完成並通過互動測試 |
+| `js/anim-queue-roleplay.js` | 輸送帶式便利貼領取預演、單步／自動派單、職員收件卡及紀錄表 | 已完成並通過互動測試 |
 
 ## 5. 最近驗證
 
@@ -62,6 +62,10 @@
 - 五個 JavaScript 檔通過 `node --check`；三頁 ID 唯一，Console 與編輯器錯誤檢查無錯誤。
 - 尚未在學校 Wi-Fi、多裝置環境或 GitHub Pages 上驗證。
 - `queue.html` 瀏覽器測試：Topic 3 張訂單 × 3 位職員各收到 3 次；Queue 3 張訂單合計處理 3 次；兩位職員領完 6 張後紀錄表各列 3 張，領取按鈕停用；375px 無水平溢出、Console 無 JavaScript 錯誤。
+- Queue 動畫 A 更新：移除 Topic／Queue 模式切換，改為共用 Publisher 同時發送至雙軌；加入帶訂單編號與顏色的粒子／收件卡、Topic 複製效果、Queue 等候及輪流派給空閒職員、職員忙碌提示、動態收件矩陣、統計、暫停與速度控制。驗收：3 位職員收到 3 張時，Topic 有 9 個 ✓、Queue 有 3 個 ✓，統計為 9／3；加減職員會同步更新。
+- Queue 動畫 B 更新：以橫向輸送帶呈現隊尾至隊首與先到先領，領取後便利貼補位並在職員旁保留卡片；加入職員顏色徽章、單步、自動示範、暫停、速度、剩餘數、完成提示及記錄表合計。驗收：2 位職員領完 6 張後按鈕停用、完成提示顯示、合計為 6 張，每張只記錄一次；375px 無水平溢出、Console 無 JavaScript 錯誤。
+- 上述 Queue 動畫改寫只涉及 `queue.html`、`js/anim-queue-compare.js`、`js/anim-queue-roleplay.js` 與 `css/theme.css`；沒有修改其他動畫檔或 MQTT 功能。
+- 動畫速度控制：Overview、Poll/Push、Retained、Queue Topic / Queue 對比及 Queue 角色扮演均提供 `0.5×`、`1×`、`2×`；Topic 通配符練習為即時互動，沒有播放時間軸，不設速度選項。
 
 ## 6. 工作紙狀態
 

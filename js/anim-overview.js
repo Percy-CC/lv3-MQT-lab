@@ -1,8 +1,10 @@
 (function() {
   const canvas = document.getElementById('cvOverview');
   const ctx = canvas.getContext('2d');
+  const speedSelect = document.getElementById('overviewSpeed');
   let W, H, DPR;
   const particles = [];
+  const pendingParticles = [];
   let subscribers = [
     { label: 'Sub A', angle: -0.4 },
     { label: 'Sub B', angle: 0 },
@@ -14,6 +16,9 @@
   const subBaseX = 0.83;
   let pulsePhase = 0;
   let brokerGlow = 0;
+  let speed = 1;
+  let simTime = 0;
+  let lastTs = 0;
 
   function subPositions() {
     const total = subscribers.length;
@@ -90,18 +95,26 @@
     const by = brokerPos.yRatio * H;
     const subs = subPositions();
     subs.forEach((s, i) => {
-      setTimeout(() => {
-        particles.push({
+      pendingParticles.push({
+        at: simTime + i * 0.08,
+        particle: {
           phase: 'to-sub', t: 0,
           sx: bx, sy: by,
           ex: s.xRatio * W, ey: s.yRatio * H,
           color: '#10b981', size: 5 * DPR
-        });
-      }, i * 80);
+        }
+      });
     });
   }
 
-  function draw() {
+  function draw(ts) {
+    if (!lastTs) lastTs = ts;
+    const dt = Math.min((ts - lastTs) / 1000, 0.05) * speed;
+    lastTs = ts;
+    simTime += dt;
+    while (pendingParticles.length && pendingParticles[0].at <= simTime) {
+      particles.push(pendingParticles.shift().particle);
+    }
     ctx.clearRect(0, 0, W, H);
     ctx.save();
     ctx.strokeStyle = isDark() ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)';
@@ -136,7 +149,7 @@
 
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
-      p.t += 0.018;
+      p.t += dt * 1.08;
       if (p.t >= 1) {
         if (p.phase === 'to-broker') {
           brokerGlow = 1;
@@ -167,8 +180,8 @@
       ctx.restore();
     }
 
-    if (brokerGlow > 0) brokerGlow = Math.max(0, brokerGlow - 0.015);
-    pulsePhase += 0.02;
+    if (brokerGlow > 0) brokerGlow = Math.max(0, brokerGlow - dt * 0.9);
+    pulsePhase += dt * 1.2;
     requestAnimationFrame(draw);
   }
 
@@ -180,6 +193,8 @@
   });
   document.getElementById('btnResetOverview').addEventListener('click', () => {
     particles.length = 0;
+    pendingParticles.length = 0;
+    simTime = 0;
     subscribers = [
       { label: 'Sub A', angle: -0.4 },
       { label: 'Sub B', angle: 0 },
@@ -187,6 +202,9 @@
     ];
     subIdCounter = 3;
     brokerGlow = 0;
+  });
+  speedSelect.addEventListener('change', () => {
+    speed = Number(speedSelect.value);
   });
 
   window.addEventListener('resize', resize);
