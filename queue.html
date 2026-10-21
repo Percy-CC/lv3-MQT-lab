@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Queue 模型角色扮演</title>
+<title>Queue 模型實驗</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet">
@@ -21,12 +21,12 @@
   </nav>
 </header>
 <main>
-  <h1 class="page-title">Queue 模型角色扮演(任務 3)</h1>
+  <h1 class="page-title">Queue 模型實驗</h1>
   <p class="page-intro">Queue 的每則訊息只由一人處理；Topic 則會把訊息送給每位訂閱者。</p>
   <div class="callout">本頁用動畫預演或投影講解；實際的角色扮演仍使用便利貼，不使用電腦。動畫只在本機模擬，不會連線 HiveMQ。</div>
 
   <section class="card" aria-labelledby="q-steps-title">
-    <h2 id="q-steps-title">角色扮演步驟</h2>
+    <h2 id="q-steps-title">實驗步驟</h2>
     <ol class="q-steps">
       <li>一位組員扮演「隊列」，把 6 張便利貼排成一列，每張寫一份訂單，例如「訂單 1：珍珠奶茶」。</li>
       <li>至少兩位組員扮演職員，輪流向「隊列」領取訂單；其餘組員負責記錄。</li>
@@ -93,7 +93,7 @@
 
   <!--
   <section class="card" aria-labelledby="q-roleplay-title">
-    <h2 id="q-roleplay-title">動畫 B：角色扮演預演</h2>
+    <h2 id="q-roleplay-title">動畫 B：預演</h2>
     <p>職員輪流領取隊列中的訂單；每張便利貼只會交給一位職員。</p>
     <p class="q-role-remaining" id="roleRemaining" aria-live="polite">隊列剩餘 6 / 6</p>
     <div class="canvas-wrap">
@@ -140,7 +140,7 @@
     <strong>對應雲服務</strong>
     <ul>
       <li>阿里雲 Simple Message Queue（SMQ）同時支援 Queue 與 Topic 兩種模型。</li>
-      <li>標準 MQTT 沒有 Queue 模型，所以本任務用角色扮演代替。</li>
+      <li>標準 MQTT 沒有 Queue 模型，所以本任務用模擬實驗代替。</li>
     </ul>
   </div>
 </main>

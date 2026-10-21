@@ -209,5 +209,5 @@
 
   window.addEventListener('resize', resize);
   resize();
-  draw();
+  requestAnimationFrame(draw);
 })();
