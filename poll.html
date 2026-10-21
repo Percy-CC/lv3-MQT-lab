@@ -87,10 +87,10 @@
 
   <div class="twin-cols">
     <section class="card">
-      <h2>Poll：每次都主動詢問</h2>
+      <h2>Poll：每次都主動詢問伺服器有沒有新信息</h2>
       <table>
         <tr><td>HTTP Request 次數</td><td id="p_req">0</td></tr>
-        <tr><td>開啟連線次數</td><td id="p_conn">0</td></tr>
+        <tr><td>連線伺服器次數（Poll）</td><td id="p_conn">0</td></tr>
         <tr><td>有新資料</td><td id="p_hit">0</td></tr>
         <tr><td>沒有變化（白問）</td><td id="p_empty">0</td></tr>
         <tr><td>白問比例</td><td id="p_ratio">-</td></tr>
@@ -102,7 +102,7 @@
       <h2>Push：訂閱一次，有新訊息才通知</h2>
       <table>
         <tr><td>額外詢問次數</td><td>0</td></tr>
-        <tr><td>開啟連線次數</td><td id="s_conn">0</td></tr>
+        <tr><td>連線伺服器次數</td><td id="s_conn">0</td></tr>
         <tr><td>收到通知次數</td><td id="s_msgs">0</td></tr>
         <tr><td>無新訊息時的通知</td><td>0</td></tr>
       </table>
