@@ -87,7 +87,7 @@
 
   <div class="twin-cols">
     <section class="card">
-      <h2>Poll：每次都主動詢問伺服器有沒有新信息</h2>
+      <h2>Poll：每次都主動詢問伺服器(<span id="pushTopic">-</span>)有沒有新信息</h2>
       <table>
         <tr><td>HTTP Request 次數</td><td id="p_req">0</td></tr>
         <tr><td>連線伺服器次數（Poll）</td><td id="p_conn">0</td></tr>
@@ -99,7 +99,7 @@
       <div class="log-box" id="p_log" aria-label="真實 Poll 實驗紀錄"></div>
     </section>
     <section class="card">
-      <h2>Push：訂閱一次，有新訊息才通知</h2>
+      <h2>Push：訂閱一次，有新訊息才通知<br>(Subscribed to topic: <span id="pushTopic">-</span>)</h2>
       <table>
         <tr><td>額外詢問次數</td><td>0</td></tr>
         <tr><td>連線伺服器次數</td><td id="s_conn">0</td></tr>
@@ -169,7 +169,7 @@ async function start(){
   const room = $("room").value.trim().replace(/[\/+#\s]/g, "");
   if(!room){ alert("請輸入 Room"); return; }
   stop(false);
-  topic = `cc-lab/${room}/state`; $("topicShow").textContent = topic;
+  topic = `cc-lab/${room}/state`; $("topicShow").textContent = topic; $("pushTopic").textContent = topic;
   st = { req:0, conn:0, hit:0, empty:0, err:0, sconn:0, push:0 };
   $("p_log").textContent = ""; $("s_log").textContent = "";
   $("state").textContent = "準備中(讀取基準資料)…";
@@ -211,7 +211,7 @@ function bot(){
     }, 2000 + Math.random() * 45000));
   }
   $("bot").disabled = true;
-  $("state").textContent = "機器人已啟動:50 秒內隨機發布 5 則";
+  $("state").textContent = "機器人已啟動:50 秒內隨機發布 5 則，模擬真人發送信息";
 }
 
 $("start").onclick = start;
